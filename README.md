@@ -1,1 +1,1 @@
-# Logicompu
+# CompuLogic
