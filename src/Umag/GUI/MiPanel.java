@@ -1,4 +1,3 @@
-
 package Umag.GUI;
 
 import Umag.Circuito.Circuito;
@@ -30,18 +29,18 @@ public class MiPanel extends JPanel {
     private int offsetX, offsetY;
     private String mensajeError = null;
     private long tiempoError = 0;
-    
+
     public MiPanel() {
         setBackground(Color.WHITE);
         addMouseListener(new MouseHandler());
         addMouseMotionListener(new MouseHandler());
     }
-    
+
     public void setCircuito(Circuito circuito) {
         this.circuito = circuito;
         repaint();
     }
-    
+
     public void setModo(Modo modo) {
         this.modoActual = modo;
         componenteSeleccionado = null;
@@ -49,11 +48,11 @@ public class MiPanel extends JPanel {
         pinSeleccionado = null;
         repaint();
     }
-    
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-         try {
+        try {
             if (circuito == null) return;
 
             Graphics2D g2d = (Graphics2D) g;
@@ -82,8 +81,8 @@ public class MiPanel extends JPanel {
 
                     if (conector == conectorSeleccionado) {
                         g2d.setColor(new Color(255, 165, 0));
-                        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 
-                                          1.0f, new float[]{10, 5}, 0));
+                        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                                1.0f, new float[]{10, 5}, 0));
                     } else {
                         g2d.setColor(estado ? new Color(100, 255, 100) : new Color(0, 100, 0));
                         g2d.setStroke(new BasicStroke(2));
@@ -93,10 +92,10 @@ public class MiPanel extends JPanel {
                         for (Pin entrada : conector.obtenerPinesEntrada()) {
                             if (entrada != null && entrada.getComponente() != null && salida.getComponente() != null) {
                                 g2d.drawLine(
-                                    salida.getComponente().getX() + getPinOffset(salida, true),
-                                    salida.getComponente().getY() + getPinY(salida),
-                                    entrada.getComponente().getX() + getPinOffset(entrada, false),
-                                    entrada.getComponente().getY() + getPinY(entrada)
+                                        salida.getComponente().getX() + getPinOffset(salida, true),
+                                        salida.getComponente().getY() + getPinY(salida),
+                                        entrada.getComponente().getX() + getPinOffset(entrada, false),
+                                        entrada.getComponente().getY() + getPinY(entrada)
                                 );
                             }
                         }
@@ -104,24 +103,24 @@ public class MiPanel extends JPanel {
                 }
 
                 if (mensajeError != null) {
-            g2d.setColor(new Color(255, 50, 50, 220)); 
-            g2d.fillRoundRect(20, 50, getWidth() - 40, 40, 15, 15);
+                    g2d.setColor(new Color(255, 50, 50, 220));
+                    g2d.fillRoundRect(20, 50, getWidth() - 40, 40, 15, 15);
 
-            g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Times New Roman", Font.BOLD, 14));
+                    g2d.setColor(Color.WHITE);
+                    g2d.setFont(new Font("Times New Roman", Font.BOLD, 14));
 
-            if (mensajeError.length() > 60) {
-                String primeraLinea = mensajeError.substring(0, 60);
-                String segundaLinea = mensajeError.length() > 60 ? mensajeError.substring(60) : "";
+                    if (mensajeError.length() > 60) {
+                        String primeraLinea = mensajeError.substring(0, 60);
+                        String segundaLinea = mensajeError.length() > 60 ? mensajeError.substring(60) : "";
 
-                g2d.drawString(primeraLinea, 30, 70);
-                if (!segundaLinea.isEmpty()) {
-                    g2d.drawString(segundaLinea, 30, 90);
+                        g2d.drawString(primeraLinea, 30, 70);
+                        if (!segundaLinea.isEmpty()) {
+                            g2d.drawString(segundaLinea, 30, 90);
+                        }
+                    } else {
+                        g2d.drawString(mensajeError, 30, 70);
+                    }
                 }
-            } else {
-                g2d.drawString(mensajeError, 30, 70);
-            }
-        }
 
             }
 
@@ -129,10 +128,10 @@ public class MiPanel extends JPanel {
                 g2d.setColor(Color.BLUE);
                 g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 g2d.drawLine(
-                    pinSeleccionado.getComponente().getX() + getPinOffset(pinSeleccionado, true),
-                    pinSeleccionado.getComponente().getY() + getPinY(pinSeleccionado),
-                    getMousePosition().x,
-                    getMousePosition().y
+                        pinSeleccionado.getComponente().getX() + getPinOffset(pinSeleccionado, true),
+                        pinSeleccionado.getComponente().getY() + getPinY(pinSeleccionado),
+                        getMousePosition().x,
+                        getMousePosition().y
                 );
             }
 
@@ -143,7 +142,7 @@ public class MiPanel extends JPanel {
 
             if (circuito.getRutaArchivo() != null) {
                 g.setFont(new Font("Times New Roman", Font.PLAIN, 12));
-                g.drawString("Ubicación: " + circuito.getRutaArchivo(), 10, 40); 
+                g.drawString("Ubicación: " + circuito.getRutaArchivo(), 10, 40);
             }
 
             if (componenteSeleccionado == null && conectorSeleccionado == null) {
@@ -158,106 +157,99 @@ public class MiPanel extends JPanel {
 
     private Rectangle calcularAreaTotal(Componente c) {
         if (c == null) return new Rectangle(0, 0, 0, 0);
-        
+
         int x = c.getX();
         int y = c.getY();
-        int width = c instanceof Compuerta ? ((Compuerta)c).ancho * 2 : 40;
-        int height = c instanceof Compuerta ? ((Compuerta)c).alto : 40;
-        
+        int width = c instanceof Compuerta ? ((Compuerta) c).ancho * 2 : 40;
+        int height = c instanceof Compuerta ? ((Compuerta) c).alto : 40;
+
         x -= 25;
         width += 50;
         y -= 15;
         height += 30;
-        
+
         return new Rectangle(x, y, width, height);
     }
-    
+
     private int getPinOffset(Pin pin, boolean isSource) {
         if (pin == null || pin.getComponente() == null) return 0;
-        
+
         if (pin.getTipo().equals("salida")) {
             if (pin.getComponente() instanceof Compuerta) {
-                return ((Compuerta)pin.getComponente()).ancho * 2 + 20;
+                return ((Compuerta) pin.getComponente()).ancho * 2 + 20;
             }
             return (pin.getComponente() instanceof Switch) ? 45 : 30;
         } else {
             return -20;
         }
     }
-    
+
     private int getPinY(Pin pin) {
         if (pin == null || pin.getComponente() == null) return 0;
-        
+
         if (pin.getComponente() instanceof Umag.Compuertas.CompuertaOR) {
-            Umag.Compuertas.CompuertaOR or = (Umag.Compuertas.CompuertaOR)pin.getComponente();
+            Umag.Compuertas.CompuertaOR or = (Umag.Compuertas.CompuertaOR) pin.getComponente();
             if (pin.getTipo().equals("entrada")) {
                 return pin == or.getEntradas().get(0) ? 10 : 30;
             } else {
                 return or.alto / 2;
             }
+        } else if (pin.getComponente() instanceof Compuerta) {
+            Compuerta c = (Compuerta) pin.getComponente();
+            int index = pin.getTipo().equals("entrada") ?
+                    c.getEntradas().indexOf(pin) :
+                    c.getSalidas().indexOf(pin);
+            return c.alto / (pin.getTipo().equals("entrada") ?
+                    (c.getEntradas().size() + 1) : 2) * (index + 1);
         }
-       
-        else if (pin.getComponente() instanceof Compuerta) {
-            Compuerta c = (Compuerta)pin.getComponente();
-            int index = pin.getTipo().equals("entrada") ? 
-                c.getEntradas().indexOf(pin) : 
-                c.getSalidas().indexOf(pin);
-            return c.alto / (pin.getTipo().equals("entrada") ? 
-                (c.getEntradas().size() + 1) : 2) * (index + 1);
-        }
-        return 15; 
+        return 15;
     }
-    
-   private Pin buscarPinEnPosicion(int x, int y) {
+
+    private Pin buscarPinEnPosicion(int x, int y) {
         if (circuito == null) return null;
-        
+
         for (Componente c : circuito.getComponentes()) {
             if (c != null) {
-                
+
                 for (Pin pin : c.getEntradas()) {
                     if (pin != null) {
                         int pinX = c.getX() + getPinOffset(pin, false);
                         int pinY = c.getY() + getPinY(pin);
-                        
-                        
+
                         Rectangle areaPinEntrada = new Rectangle(
-                            pinX - 10,  
-                            pinY - 10,  
-                            60,         
-                            25          
+                                pinX - 10,
+                                pinY - 10,
+                                60,
+                                25
                         );
-                        
+
                         if (areaPinEntrada.contains(x, y)) {
                             return pin;
                         }
                     }
                 }
-                
-                
+
                 for (Pin pin : c.getSalidas()) {
                     if (pin != null) {
                         int pinX = c.getX() + getPinOffset(pin, true);
-                        int pinY = c.getY() + getPinY(pin);                      
-                    
+                        int pinY = c.getY() + getPinY(pin);
+
                         int tamañoArea = 40;
-                        
-                        if (c instanceof Umag.Compuertas.CompuertaOR ) {
+
+                        if (c instanceof Umag.Compuertas.CompuertaOR) {
                             tamañoArea = 48;
-                            
+
+                        } else if (c instanceof Switch) {
+                            tamañoArea = 30;
                         }
-                        
-                        else if(c instanceof Switch){
-                            tamañoArea= 30;
-                        }
-                        
-                        
+
                         Rectangle areaPinSalida = new Rectangle(
-                            pinX - tamañoArea/2,  
-                            pinY - tamañoArea/2,  
-                            tamañoArea,
-                            tamañoArea
+                                pinX - tamañoArea / 2,
+                                pinY - tamañoArea / 2,
+                                tamañoArea,
+                                tamañoArea
                         );
-                        
+
                         if (areaPinSalida.contains(x, y)) {
                             return pin;
                         }
@@ -267,25 +259,25 @@ public class MiPanel extends JPanel {
         }
         return null;
     }
-    
+
     private Conector buscarConectorEnPosicion(int x, int y) {
         if (circuito == null) return null;
-        
+
         for (Conector conector : circuito.getConexiones()) {
             if (conector != null) {
                 Pin salida = conector.obtenerPinSalida();
                 Pin entrada = conector.obtenerPinEntrada();
-                
-                if (salida != null && entrada != null && 
-                    salida.getComponente() != null && entrada.getComponente() != null) {
-                    
+
+                if (salida != null && entrada != null &&
+                        salida.getComponente() != null && entrada.getComponente() != null) {
+
                     Line2D linea = new Line2D.Double(
-                        salida.getComponente().getX() + getPinOffset(salida, true),
-                        salida.getComponente().getY() + getPinY(salida),
-                        entrada.getComponente().getX() + getPinOffset(entrada, false),
-                        entrada.getComponente().getY() + getPinY(entrada)
+                            salida.getComponente().getX() + getPinOffset(salida, true),
+                            salida.getComponente().getY() + getPinY(salida),
+                            entrada.getComponente().getX() + getPinOffset(entrada, false),
+                            entrada.getComponente().getY() + getPinY(entrada)
                     );
-                                       
+
                     if (linea.ptSegDist(x, y) < 12) {
                         return conector;
                     }
@@ -299,25 +291,23 @@ public class MiPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             Object[] options = {"Aceptar"};
             JOptionPane.showOptionDialog(
-                this,
-                mensaje,
-                "Error en el Circuito",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.ERROR_MESSAGE,
-                null,
-                options,
-                options[0]
+                    this,
+                    mensaje,
+                    "Error en el Circuito",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.ERROR_MESSAGE,
+                    null,
+                    options,
+                    options[0]
             );
         });
     }
 
-    
-    
     private class MouseHandler extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
             if (circuito == null) return;
-            
+
             if (modoActual == Modo.SELECCION) {
                 componenteSeleccionado = null;
                 for (Componente c : circuito.getComponentes()) {
@@ -327,19 +317,19 @@ public class MiPanel extends JPanel {
                             componenteSeleccionado = c;
                             offsetX = e.getX() - c.getX();
                             offsetY = e.getY() - c.getY();
-                            
+
                             if (getTopLevelAncestor() instanceof Main) {
-                                ((Main)getTopLevelAncestor()).actualizarControlesEntrada(c);
+                                ((Main) getTopLevelAncestor()).actualizarControlesEntrada(c);
                             }
                             break;
                         }
                     }
                 }
-                
+
                 if (componenteSeleccionado == null) {
                     conectorSeleccionado = buscarConectorEnPosicion(e.getX(), e.getY());
                     if (conectorSeleccionado != null && getTopLevelAncestor() instanceof Main) {
-                        ((Main)getTopLevelAncestor()).actualizarControlesEntrada(null);
+                        ((Main) getTopLevelAncestor()).actualizarControlesEntrada(null);
                     }
                 } else {
                     conectorSeleccionado = null;
@@ -349,55 +339,55 @@ public class MiPanel extends JPanel {
                 pinSeleccionado = buscarPinEnPosicion(e.getX(), e.getY());
             }
         }
-        
+
         @Override
         public void mouseReleased(MouseEvent e) {
-        if (modoActual == Modo.CONEXION && pinSeleccionado != null) {
-            try {
-                Pin otroPin = buscarPinEnPosicion(e.getX(), e.getY());
-                
-                if (otroPin == null) {
-                    throw new Exception("Debe seleccionar un pin válido para conectar");
+            if (modoActual == Modo.CONEXION && pinSeleccionado != null) {
+                try {
+                    Pin otroPin = buscarPinEnPosicion(e.getX(), e.getY());
+
+                    if (otroPin == null) {
+                        throw new Exception("Debe seleccionar un pin válido para conectar");
+                    }
+                    if (otroPin.equals(pinSeleccionado)) {
+                        throw new Exception("No puede conectar un pin consigo mismo");
+                    }
+                    // Solo conecta salida a entrada
+                    if (pinSeleccionado.getTipo().equals(otroPin.getTipo())) {
+                        throw new Exception("Debe conectar una salida con una entrada");
+                    }
+                    // Solo una entrada puede estar ya conectada
+                    if ("entrada".equals(otroPin.getTipo()) && otroPin.getConector() != null) {
+                        throw new Exception("El pin de entrada ya está conectado");
+                    }
+                    if ("entrada".equals(pinSeleccionado.getTipo()) && pinSeleccionado.getConector() != null) {
+                        throw new Exception("El pin de entrada ya está conectado");
+                    }
+
+                    // Detecta cuál es salida y cuál es entrada
+                    Pin pinSalida, pinEntrada;
+                    if ("salida".equals(pinSeleccionado.getTipo())) {
+                        pinSalida = pinSeleccionado;
+                        pinEntrada = otroPin;
+                    } else {
+                        pinSalida = otroPin;
+                        pinEntrada = pinSeleccionado;
+                    }
+
+                    // Conecta correctamente por índice
+                    circuito.conectar(
+                            pinSalida.getComponente(), pinSalida.getComponente().getSalidas().indexOf(pinSalida),
+                            pinEntrada.getComponente(), pinEntrada.getComponente().getEntradas().indexOf(pinEntrada)
+                    );
+                } catch (Exception ex) {
+                    mostrarMensajeError(ex.getMessage());
+                } finally {
+                    pinSeleccionado = null;
+                    repaint();
                 }
-                
-                if (otroPin.equals(pinSeleccionado)) {
-                    throw new Exception("No puede conectar un pin consigo mismo");
-                }
-                
-                // Eliminamos la validación de tipos aquí, se manejará en Conector
-                if (otroPin.getConector() != null && "entrada".equals(otroPin.getTipo())) {
-                    throw new Exception("El pin de entrada ya está conectado");
-                }
-                
-                // Conexión bidireccional
-                circuito.conectar(
-                    pinSeleccionado.getComponente(), 
-                    obtenerIndicePin(pinSeleccionado),
-                    otroPin.getComponente(),
-                    obtenerIndicePin(otroPin)
-                );
-                
-            } catch (Exception ex) {
-                mostrarMensajeError(ex.getMessage());
-            } finally {
-                pinSeleccionado = null;
-                repaint();
             }
         }
-    }
-    
-    private int obtenerIndicePin(Pin pin) {
-        Componente comp = pin.getComponente();
-        if ("salida".equals(pin.getTipo())) {
-            return comp.getSalidas().indexOf(pin);
-        } else {
-            return comp.getSalidas().size() + comp.getEntradas().indexOf(pin);
-        }
-    }
 
-
-    
-        
         @Override
         public void mouseDragged(MouseEvent e) {
             if (componenteSeleccionado != null && modoActual == Modo.SELECCION) {
@@ -408,12 +398,11 @@ public class MiPanel extends JPanel {
             }
         }
     }
-    
 
     public enum Modo {
         SELECCION, CONEXION
     }
-    
+
     public Circuito getCircuito() {
         return circuito;
     }
@@ -426,15 +415,15 @@ public class MiPanel extends JPanel {
     public void setPinSeleccionado(Pin pin) {
         this.pinSeleccionado = pin;
     }
-    
+
     public Componente getComponenteSeleccionado() {
         return componenteSeleccionado;
     }
-    
+
     public Conector getConectorSeleccionado() {
         return conectorSeleccionado;
     }
-    
+
     public void setConectorSeleccionado(Conector conector) {
         this.conectorSeleccionado = conector;
         this.componenteSeleccionado = null;

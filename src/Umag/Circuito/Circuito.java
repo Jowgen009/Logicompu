@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Umag.Circuito;
 
 import Umag.Componentes.Componente;
@@ -35,7 +31,6 @@ public class Circuito implements Serializable {
         if (panelReferencia != null) {
             panelReferencia.mostrarMensajeError(mensaje);
         } else {
-            // Fallback si no hay panel de referencia
             JOptionPane.showMessageDialog(
                 null,
                 mensaje,
@@ -123,9 +118,9 @@ public class Circuito implements Serializable {
                     }
                 }
             } catch (Exception e) {
-    if (panelReferencia != null)
-        panelReferencia.mostrarMensajeError("Error reconstruyendo conector #" + i + ": " + e.getMessage());
-}
+                if (panelReferencia != null)
+                    panelReferencia.mostrarMensajeError("Error reconstruyendo conector #" + i + ": " + e.getMessage());
+            }
         }
 
         evaluar();
@@ -160,46 +155,32 @@ public class Circuito implements Serializable {
         }
     }
 
-    public void conectar(Componente origen, int pinOrigenIndex, Componente destino, int pinDestinoIndex) {
-    try {
-        if (origen == null || destino == null) {
-            throw new Exception("Los componentes no pueden ser nulos");
-        }
-
-        // Obtener los pines sin asumir su tipo
-        Pin pinOrigen = obtenerPin(origen, pinOrigenIndex);
-        Pin pinDestino = obtenerPin(destino, pinDestinoIndex);
-
-        if (pinOrigen == null || pinDestino == null) {
-            throw new Exception("Los pines especificados no existen");
-        }
-
-        Conector nuevoConector = new Conector();
-        if (!nuevoConector.conectar(pinOrigen, pinDestino)) {
-            throw new Exception("No se pudo crear la conexión");
-        }
-        
-        conexiones.add(nuevoConector);
-        modificado = true;
-        destino.evaluar();
-        
-    } catch (Exception e) {
-        mostrarError("Error de conexión: " + e.getMessage());
-    }
-}
-
-      
-       private Pin obtenerPin(Componente componente, int pinIndex) {
-            if (pinIndex < componente.getSalidas().size()) {
-                return componente.getSalidas().get(pinIndex);
-            } else {
-                int entradaIndex = pinIndex - componente.getSalidas().size();
-                if (entradaIndex < componente.getEntradas().size()) {
-                    return componente.getEntradas().get(entradaIndex);
-                }
+    public void conectar(Componente origen, int salidaIdx, Componente destino, int entradaIdx) {
+        try {
+            if (origen == null || destino == null) {
+                throw new Exception("Los componentes no pueden ser nulos");
             }
-            return null;
+            List<Pin> salidas = origen.getSalidas();
+            List<Pin> entradas = destino.getEntradas();
+            if (salidaIdx < 0 || salidaIdx >= salidas.size()) {
+                throw new Exception("Índice de salida inválido para " + origen.getNombre());
+            }
+            if (entradaIdx < 0 || entradaIdx >= entradas.size()) {
+                throw new Exception("Índice de entrada inválido para " + destino.getNombre());
+            }
+            Pin pinSalida = salidas.get(salidaIdx);
+            Pin pinEntrada = entradas.get(entradaIdx);
+            Conector nuevoConector = new Conector();
+            if (!nuevoConector.conectar(pinSalida, pinEntrada)) {
+                throw new Exception("No se pudo crear la conexión");
+            }
+            conexiones.add(nuevoConector);
+            modificado = true;
+            destino.evaluar();
+        } catch (Exception e) {
+            mostrarError("Error de conexión: " + e.getMessage());
         }
+    }
 
     public void evaluar() {
         for (Componente componente : componentes) {
@@ -207,7 +188,6 @@ public class Circuito implements Serializable {
                 componente.evaluar();
             }
         }
-
         for (Conector conector : conexiones) {
             if (conector != null) {
                 conector.propagarEstado();

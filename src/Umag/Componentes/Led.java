@@ -1,24 +1,35 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Umag.Componentes;
 
+import Umag.Circuito.Pin;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
+import Umag.Logica.ExpresionBooleana;
 
-public class Led extends Componente {
-    public Led(int x, int y) {
+public class Led extends Componente implements ExpresionBooleana {
+    private String nombre;
+
+    public Led(int x, int y, String nombre) {
         super(x, y, 1, 0);
+        this.nombre = nombre;
     }
-    
+
+    public Led(int x, int y) {
+        this(x, y, "LED");
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     @Override
     public void evaluar() {
-        // LEDs no tienen salidas, solo muestran el estado de la entrada
     }
-    
+
     @Override
     public void dibujar(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
@@ -57,8 +68,21 @@ public class Led extends Componente {
         g2d.setColor(Color.BLACK);
         g2d.drawString(encendido ? "1" : "0", cuerpoX + cuerpoAncho + 20, cuerpoY + 10);
 
+        // Dibuja el nombre del LED debajo
+        g2d.setColor(Color.BLUE);
+        g2d.drawString(nombre, cuerpoX + 5, cuerpoY + cuerpoAlto + 18);
+
         g2d.dispose();
     }
 
-
+    @Override
+   public String toBooleanExpression() {
+       if (!getEntradas().isEmpty() && getEntradas().get(0).getConector() != null) {
+           Pin pinSalida = getEntradas().get(0).getConector().obtenerPinSalida();
+           if (pinSalida != null && pinSalida.getComponente() != null) {
+               return pinSalida.getComponente().toBooleanExpression();
+           }
+       }
+       return "?";
+   }
 }

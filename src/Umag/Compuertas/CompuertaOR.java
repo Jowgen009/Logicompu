@@ -1,34 +1,33 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Umag.Compuertas;
 
+import Umag.Circuito.Pin;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import Umag.Logica.ExpresionBooleana;
 
-public class CompuertaOR extends Compuerta {
+public class CompuertaOR extends Compuerta implements ExpresionBooleana {
+    public CompuertaOR(int x, int y, String nombre) {
+        super(x, y, 2, nombre);
+    }
+
     public CompuertaOR(int x, int y) {
         super(x, y, 2);
     }
-    
+
     @Override
-public void evaluar() {
-    if (entradas.size() >= 2) {
-        boolean resultado = entradas.get(0).obtenerEstado() || 
-                          entradas.get(1).obtenerEstado();
-        salidas.get(0).cambiarEstado(resultado);
-    } else if (entradas.size() == 1) {
-        
-        salidas.get(0).cambiarEstado(entradas.get(0).obtenerEstado());
-    } else {
-       
-        salidas.get(0).cambiarEstado(false);
+    public void evaluar() {
+        if (entradas.size() >= 2) {
+            boolean resultado = entradas.get(0).obtenerEstado() ||
+                                entradas.get(1).obtenerEstado();
+            salidas.get(0).cambiarEstado(resultado);
+        } else if (entradas.size() == 1) {
+            salidas.get(0).cambiarEstado(entradas.get(0).obtenerEstado());
+        } else {
+            salidas.get(0).cambiarEstado(false);
+        }
     }
-}
-    
+
     @Override
     public void dibujarCompuerta(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
@@ -67,7 +66,33 @@ public void evaluar() {
             g2d.drawString(salidas.get(0).obtenerEstado() ? "1" : "0", x + 80, y + 25);
         }
 
+        // Dibuja el nombre de la compuerta
+        if (nombre != null) {
+            g2d.drawString(nombre, x + 20, y - 5);
+        }
+
         g2d.dispose();
     }
 
+    @Override
+    public String toBooleanExpression() {
+        if (getEntradas().size() >= 2) {
+            String left = "?";
+            String right = "?";
+            if (getEntradas().get(0).getConector() != null) {
+                Pin pin0 = getEntradas().get(0).getConector().obtenerPinSalida();
+                if (pin0 != null && pin0.getComponente() != null) {
+                    left = pin0.getComponente().toBooleanExpression();
+                }
+            }
+            if (getEntradas().get(1).getConector() != null) {
+                Pin pin1 = getEntradas().get(1).getConector().obtenerPinSalida();
+                if (pin1 != null && pin1.getComponente() != null) {
+                    right = pin1.getComponente().toBooleanExpression();
+                }
+            }
+            return "(" + left + " OR " + right + ")";
+        }
+        return "?";
+    }
 }

@@ -1,34 +1,35 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Umag.Componentes;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
+import Umag.Logica.ExpresionBooleana;
 
-public class Switch extends Componente {
+public class Switch extends Componente implements ExpresionBooleana {
     private boolean estado;
-    
-    public Switch(int x, int y) {
+    private String nombre;
+
+    public Switch(int x, int y, String nombre) {
         super(x, y, 0, 1);
         this.estado = false;
+        this.nombre = nombre;
     }
-    
+
+    public Switch(int x, int y) {
+        this(x, y, "SW");
+    }
+
     public void toggle() {
         estado = !estado;
-        
         salidas.get(0).cambiarEstado(estado);
     }
-    
+
     @Override
     public void evaluar() {
-        
         salidas.get(0).cambiarEstado(estado);
     }
-    
+
     @Override
     public void dibujar(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
@@ -63,11 +64,27 @@ public class Switch extends Componente {
         g2d.setColor(Color.BLUE);
         g2d.fillOval(x + 42, y + 12, 6, 6);
 
+        // Dibuja el nombre del switch
+        g2d.setColor(Color.BLACK);
+        g2d.drawString(nombre, x + 10, y + 45);
+
         g2d.dispose();
     }
 
-    
     public boolean getEstado() {
         return estado;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    @Override
+    public String toBooleanExpression() {
+        return getNombre();
     }
 }

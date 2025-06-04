@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Umag.Circuito;
 
 import Umag.Componentes.Componente;
@@ -9,7 +5,7 @@ import java.io.Serializable;
 
 public class Pin implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String tipo; // "entrada" o "salida"
+    private String tipo;  
     private boolean estado;
     private Componente componente;
     private transient Conector conector;
@@ -20,13 +16,11 @@ public class Pin implements Serializable {
         this.estado = false;
         this.conector = null;
     }
-    
-    
 
     public void setComponente(Componente componente) {
         this.componente = componente;
     }
-    
+
     public boolean obtenerEstado() {
         return estado;
     }
@@ -38,18 +32,18 @@ public class Pin implements Serializable {
         }
     }
 
-   public void conectarA(Conector conector) {
-   try {
+    public void conectarA(Conector conector) {
+        try {
             if (conector == null) {
                 throw new Exception("El conector no puede ser nulo");
             }
-            
+
             if ("entrada".equals(tipo) && this.conector != null) {
                 throw new Exception("Pin de entrada ya conectado");
             }
-            
+
             this.conector = conector;
-            
+
             if ("entrada".equals(tipo) && conector.obtenerPinSalida() != null) {
                 this.estado = conector.obtenerPinSalida().obtenerEstado();
                 if (componente != null) {
@@ -61,22 +55,22 @@ public class Pin implements Serializable {
                 componente.getCircuito().mostrarError(e.getMessage());
             }
         }
-}
+    }
 
     public void desconectar() {
-    System.out.println("[DEBUG] Desconectando pin " + this);
-    
-    if ("entrada".equals(tipo)) {
-        this.estado = false;
-        System.out.println("[DEBUG]   Estado resetado a false");
-        
-        if (componente != null) {
-            System.out.println("[DEBUG]   Evaluando componente padre");
-            componente.evaluar();
+        System.out.println("[DEBUG] Desconectando pin " + this);
+
+        if ("entrada".equals(tipo)) {
+            this.estado = false;
+            System.out.println("[DEBUG]   Estado resetado a false");
+
+            if (componente != null) {
+                System.out.println("[DEBUG]   Evaluando componente padre");
+                componente.evaluar();
+            }
         }
+        this.conector = null;
     }
-    this.conector = null;
-}
 
     public String getTipo() {
         return tipo;
@@ -89,4 +83,12 @@ public class Pin implements Serializable {
     public Conector getConector() {
         return conector;
     }
+
+    public Componente getComponenteOrigen() {
+        if ("entrada".equals(tipo) && conector != null && conector.obtenerPinSalida() != null) {
+            return conector.obtenerPinSalida().getComponente();
+        }
+        return null;
+    }
+
 }

@@ -7,8 +7,13 @@ import Umag.Componentes.Switch;
 import Umag.Compuertas.CompuertaAND;
 import Umag.Compuertas.CompuertaNOT;
 import Umag.Compuertas.CompuertaOR;
+import Umag.Logica.TablaDeVerdadDialogo;
+import Umag.Logica.ExportadorTablaDeVerdad;
+import Umag.Logica.GeneradorTablaVerdad;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.HeadlessException;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 
@@ -21,7 +26,9 @@ public class Main extends javax.swing.JFrame {
     private Circuito circuito;
     private Componente componenteSeleccionado;
     int xMouse, yMouse;
-
+    private int contadorCompuerta = 1;
+    private int contadorLed = 1;
+    private int contadorSwitch = 1;
     
     public Main() {
        
@@ -52,7 +59,94 @@ public class Main extends javax.swing.JFrame {
             btnEncenderSW.setSelected(aSwitch.getEstado());
         }
     }
+    private void mostrarTablaVerdad() {
+        try {
+            Umag.Logica.PuertaLogica logicGate = new Umag.Logica.AdaptadorCircuitoLogico(circuito);
+            GeneradorTablaVerdad generator = new GeneradorTablaVerdad(logicGate);
+            java.util.List<java.util.List<String>> tabla = generator.getTablaVerdad();
+            TablaDeVerdadDialogo dialog = new TablaDeVerdadDialogo(this, tabla);
+            dialog.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "No se pudo generar la tabla de verdad: " + ex.getMessage());
+        }
+    }
     
+    private void exportarTablaVerdad() {
+        try {
+            Umag.Logica.PuertaLogica logicGate = new Umag.Logica.AdaptadorCircuitoLogico(circuito);
+            GeneradorTablaVerdad generator = new GeneradorTablaVerdad(logicGate);
+            java.util.List<java.util.List<String>> tabla = generator.getTablaVerdad();
+            javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+            int result = fileChooser.showSaveDialog(this);
+            if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+                java.io.File file = fileChooser.getSelectedFile();
+                ExportadorTablaDeVerdad.exportToCSV(tabla, file);
+                JOptionPane.showMessageDialog(this, "Tabla exportada correctamente.");
+            }
+        } catch (HeadlessException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "No se pudo exportar la tabla de verdad: " + ex.getMessage());
+        }
+    }
+    private void mostrarExpresionCircuito() {
+        StringBuilder sb = new StringBuilder();
+        boolean found = false;
+        for (Umag.Componentes.Componente c : circuito.getComponentes()) {
+            if (c instanceof Umag.Componentes.Led led) {
+                found = true;
+                sb.append(led.getNombre()).append(" = ").append(led.toBooleanExpression()).append("\n");
+            }
+        }
+        if (!found) {
+            JOptionPane.showMessageDialog(this, "No hay LED en el circuito.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, sb.toString(), "Expresiones Booleanas del Circuito", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    private void crearCircuitoDesdeExpresion() {
+        String expr = JOptionPane.showInputDialog(this, 
+            "Introduce la(s) expresión(es):\nEjemplo: LED1 = A AND B; LED2 = A OR B\nO simplemente: A AND B");
+        if (expr != null && !expr.trim().isEmpty()) {
+            try {
+                // Limpia cualquier selección o referencias viejas del panel
+                limpiarSeleccion();
+                mp.setComponenteSeleccionado(null);
+                mp.setConectorSeleccionado(null);
+
+                Umag.Circuito.Circuito nuevoCircuito = new Umag.Circuito.Circuito("Desde expresión");
+                String[] expresiones = expr.split(";");
+                boolean algunaCorrecta = false;
+                for (String exp : expresiones) {
+                    exp = exp.trim();
+                    if (exp.isEmpty()) continue;
+                    if (exp.contains("=")) {
+                        String[] partes = exp.split("=", 2);
+                        if (partes.length == 2) {
+                            String nombreLed = partes[0].trim();
+                            String expresion = partes[1].trim();
+                            Umag.Logica.AnalizadorExpresionBooleana parser = new Umag.Logica.AnalizadorExpresionBooleana(expresion, nuevoCircuito);
+                            parser.analizador(nombreLed);
+                            algunaCorrecta = true;
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Formato inválido en: " + exp, "Expresión inválida", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    } else {
+                        Umag.Logica.AnalizadorExpresionBooleana analizador = new Umag.Logica.AnalizadorExpresionBooleana(exp, nuevoCircuito);
+                        analizador.analizador();
+                        algunaCorrecta = true;
+                    }
+                }
+                if (algunaCorrecta) {
+                    mp.setCircuito(nuevoCircuito);
+                    nuevoCircuito.setPanelReferencia(mp);
+                    mp.repaint();
+                    this.circuito = nuevoCircuito;
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Expresión inválida", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
     public void limpiarSeleccion() {
         componenteSeleccionado = null;
         btnEncenderSW.setEnabled(false);
@@ -87,6 +181,10 @@ public class Main extends javax.swing.JFrame {
         subBtnNuevo = new javax.swing.JMenuItem();
         subBtnGuardar = new javax.swing.JMenuItem();
         subBtnGuardarComo = new javax.swing.JMenuItem();
+        btn_mostrarTDV = new javax.swing.JMenuItem();
+        btn_exportarTDV = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         subBtnSalir = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         subBtnAcercade = new javax.swing.JMenuItem();
@@ -407,6 +505,7 @@ public class Main extends javax.swing.JFrame {
 
         jMenu1.setText("File");
 
+        subBtnAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         subBtnAbrir.setText("Abrir");
         subBtnAbrir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -415,6 +514,7 @@ public class Main extends javax.swing.JFrame {
         });
         jMenu1.add(subBtnAbrir);
 
+        subBtnNuevo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         subBtnNuevo.setText("Nuevo");
         subBtnNuevo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -423,6 +523,7 @@ public class Main extends javax.swing.JFrame {
         });
         jMenu1.add(subBtnNuevo);
 
+        subBtnGuardar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         subBtnGuardar.setText("Guardar");
         subBtnGuardar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -431,6 +532,7 @@ public class Main extends javax.swing.JFrame {
         });
         jMenu1.add(subBtnGuardar);
 
+        subBtnGuardarComo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         subBtnGuardarComo.setText("Guardar como");
         subBtnGuardarComo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -439,6 +541,43 @@ public class Main extends javax.swing.JFrame {
         });
         jMenu1.add(subBtnGuardarComo);
 
+        btn_mostrarTDV.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        btn_mostrarTDV.setText("Mostrar tabla de verdad");
+        btn_mostrarTDV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_mostrarTDVActionPerformed(evt);
+            }
+        });
+        jMenu1.add(btn_mostrarTDV);
+
+        btn_exportarTDV.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        btn_exportarTDV.setText("Exportar tabla de verdad");
+        btn_exportarTDV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_exportarTDVActionPerformed(evt);
+            }
+        });
+        jMenu1.add(btn_exportarTDV);
+
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        jMenuItem1.setText("Expresion a Circuito");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        jMenuItem2.setText("Circuito a Expresion");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
+
+        subBtnSalir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.SHIFT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
         subBtnSalir.setText("Salir");
         subBtnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -478,12 +617,14 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnANDMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnANDMouseClicked
-        circuito.agregarComponente(new CompuertaAND(200, 50));
+        String nombre = "G" + (contadorCompuerta++);
+        circuito.agregarComponente(new CompuertaAND(200, 50, nombre));
         mp.repaint();
     }//GEN-LAST:event_btnANDMouseClicked
 
     private void btnORMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnORMouseClicked
-        circuito.agregarComponente(new CompuertaOR(200, 50));
+        String nombre = "G" + (contadorCompuerta++);
+        circuito.agregarComponente(new CompuertaOR(200, 50, nombre));
         mp.repaint();
     }//GEN-LAST:event_btnORMouseClicked
 
@@ -496,7 +637,8 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btnANDMouseExited
 
     private void btnNOTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnNOTMouseClicked
-        circuito.agregarComponente(new CompuertaNOT(200, 50));
+        String nombre = "G" + (contadorCompuerta++);
+        circuito.agregarComponente(new CompuertaNOT(200, 50, nombre));
         mp.repaint();
     }//GEN-LAST:event_btnNOTMouseClicked
 
@@ -546,7 +688,8 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btnConectarMouseExited
 
     private void btnLEDMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLEDMouseClicked
-        Led led = new Led(50, 50);
+        String nombre = "OUT" + (contadorLed++);
+        Led led = new Led(50, 50, nombre);
         if (mp.getCircuito() != null) {
             mp.getCircuito().agregarComponente(led);
         }
@@ -562,7 +705,8 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btnLEDMouseExited
 
     private void btnSwitchMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSwitchMouseClicked
-        Switch sw = new Switch(50, 50);
+        String nombre = "SW" + (contadorSwitch++);
+        Switch sw = new Switch(50, 50, nombre);
         if (mp.getCircuito() != null) {
             mp.getCircuito().agregarComponente(sw);
         }
@@ -745,6 +889,22 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnEncenderSWActionPerformed
 
+    private void btn_mostrarTDVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_mostrarTDVActionPerformed
+        mostrarTablaVerdad();
+    }//GEN-LAST:event_btn_mostrarTDVActionPerformed
+
+    private void btn_exportarTDVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_exportarTDVActionPerformed
+        exportarTablaVerdad();
+    }//GEN-LAST:event_btn_exportarTDVActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+         crearCircuitoDesdeExpresion();
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        mostrarExpresionCircuito();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -789,9 +949,13 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel btnOR;
     private javax.swing.JLabel btnSeleccionar;
     private javax.swing.JLabel btnSwitch;
+    private javax.swing.JMenuItem btn_exportarTDV;
+    private javax.swing.JMenuItem btn_mostrarTDV;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel panelHerramientas;
     private javax.swing.JPanel panelSuperior;
     private javax.swing.JPanel panelTablero;
